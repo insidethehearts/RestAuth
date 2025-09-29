@@ -1,12 +1,20 @@
 package me.therimuru.RestAuth.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Entity
 @Table(name = "users")
+@ToString
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class UserEntity {
 
-    @Id @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false, insertable = false)
     private Long id;
 

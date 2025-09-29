@@ -4,6 +4,6 @@ import me.therimuru.RestAuth.dto.UserSignUpDTO;
 
 public class UserNotFoundInDatabaseException extends RuntimeException {
     public UserNotFoundInDatabaseException(UserSignUpDTO userSignUpDTO) {
-        super(userSignUpDTO.getLogin());
+        super(userSignUpDTO.getUsername());
     }
 }
