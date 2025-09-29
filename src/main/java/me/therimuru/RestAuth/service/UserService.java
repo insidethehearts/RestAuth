@@ -1,9 +1,11 @@
 package me.therimuru.RestAuth.service;
 
-import org.springframework.stereotype.Repository;
-import org.springframework.stereotype.Service;
+import me.therimuru.RestAuth.dto.UserSignUpDTO;
 
-@Service
 public interface UserService {
+
+    boolean isRegistrable(UserSignUpDTO userSignUpDTO);
+
+    void register(UserSignUpDTO userSignUpDTO);
 
 }
