@@ -2,6 +2,7 @@ package me.therimuru.RestAuth.service.implementation;
 
 import lombok.AllArgsConstructor;
 import me.therimuru.RestAuth.dto.UserSignUpDTO;
+import me.therimuru.RestAuth.entity.UserEntity;
 import me.therimuru.RestAuth.mapper.UserMapper;
 import me.therimuru.RestAuth.repository.UserRepository;
 import me.therimuru.RestAuth.service.UserService;
@@ -21,8 +22,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void register(UserSignUpDTO userSignUpDTO) {
-        userRepository.save(userMapper.userSignUpDTOToUserEntity(userSignUpDTO));
+    public UserEntity register(UserSignUpDTO userSignUpDTO) {
+        return userRepository.save(userMapper.userSignUpDTOToUserEntity(userSignUpDTO));
     }
 
 }

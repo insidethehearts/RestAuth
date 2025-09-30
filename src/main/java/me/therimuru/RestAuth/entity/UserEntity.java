@@ -1,10 +1,7 @@
 package me.therimuru.RestAuth.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 @Entity
 @Table(name = "users")
@@ -12,6 +9,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Data
 public class UserEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
