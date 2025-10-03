@@ -12,7 +12,7 @@ public class ApiResponse {
     private final Map<String, Object> fields = new HashMap<>();
 
     private ApiResponse(HttpStatus httpStatus) {
-            this.httpStatus = httpStatus;
+        this.httpStatus = httpStatus;
     }
 
     public ApiResponse field(String key, Object value) {
@@ -21,6 +21,16 @@ public class ApiResponse {
     }
 
     public ResponseEntity<Map<String, Object>> build() {
+        fields.put("status",
+                switch (httpStatus.series().value()) {
+                    case 1 -> "Info";
+                    case 2 -> "Success";
+                    case 3 -> "Redirection";
+                    case 4 -> "Client error";
+                    case 5 -> "Internal server error";
+                    default -> "Undefined";
+                }
+        );
         return new ResponseEntity<>(fields, httpStatus);
     }
 
