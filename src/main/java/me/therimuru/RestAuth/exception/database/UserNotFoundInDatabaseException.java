@@ -1,4 +1,4 @@
-package me.therimuru.RestAuth.exception;
+package me.therimuru.RestAuth.exception.database;
 
 import me.therimuru.RestAuth.dto.UserSignUpDTO;
 

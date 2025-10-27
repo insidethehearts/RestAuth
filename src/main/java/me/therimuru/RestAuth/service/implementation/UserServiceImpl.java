@@ -6,6 +6,7 @@ import me.therimuru.RestAuth.entity.UserEntity;
 import me.therimuru.RestAuth.mapper.UserMapper;
 import me.therimuru.RestAuth.repository.UserRepository;
 import me.therimuru.RestAuth.service.UserService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -14,6 +15,7 @@ public class UserServiceImpl implements UserService {
 
     private UserMapper userMapper;
     private UserRepository userRepository;
+    private PasswordEncoder passwordEncoder;
 
     @Override
     public boolean isRegistrable(UserSignUpDTO userSignUpDTO) {
@@ -23,6 +25,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserEntity register(UserSignUpDTO userSignUpDTO) {
+        userSignUpDTO.setPassword(passwordEncoder.encode(userSignUpDTO.getPassword()));
         return userRepository.save(userMapper.userSignUpDTOToUserEntity(userSignUpDTO));
     }
 
