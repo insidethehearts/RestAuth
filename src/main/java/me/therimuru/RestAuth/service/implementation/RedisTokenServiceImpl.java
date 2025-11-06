@@ -1,7 +1,8 @@
 package me.therimuru.RestAuth.service.implementation;
 
 import lombok.AllArgsConstructor;
-import me.therimuru.RestAuth.object.JWTRedisValue;
+import me.therimuru.RestAuth.object.JwtRedisKey;
+import me.therimuru.RestAuth.service.JwtService;
 import me.therimuru.RestAuth.service.RedisTokenService;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -14,15 +15,21 @@ import java.time.Instant;
 public class RedisTokenServiceImpl implements RedisTokenService {
 
     private RedisTemplate<Long, Object> redisTemplate;
+    private JwtService jwtService;
 
     @Override
-    public void saveRefreshToken(JWTRedisValue jwtRedisValue, Instant tokenExpirationInstant) {
-        redisTemplate.opsForValue().set(jwtRedisValue.userID(), jwtRedisValue.token(), Duration.between(Instant.now(), tokenExpirationInstant));
+    public void saveRefreshToken(JwtRedisKey jwtRedisKey) {
+        saveRefreshToken(jwtRedisKey, Instant.now().plus(jwtService.getRefreshTokenDuration()));
     }
 
     @Override
-    public JWTRedisValue getRefreshToken(Long userId) {
-        return (JWTRedisValue) redisTemplate.opsForValue().get(userId);
+    public void saveRefreshToken(JwtRedisKey jwtRedisKey, Instant tokenExpirationInstant) {
+        redisTemplate.opsForValue().set(jwtRedisKey.userID(), jwtRedisKey.token(), Duration.between(Instant.now(), tokenExpirationInstant));
+    }
+
+    @Override
+    public JwtRedisKey getRefreshToken(Long userId) {
+        return new JwtRedisKey(userId, (String) redisTemplate.opsForValue().get(userId));
     }
 
     @Override

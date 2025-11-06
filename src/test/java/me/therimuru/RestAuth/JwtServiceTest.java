@@ -5,7 +5,8 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.github.javafaker.Faker;
 import me.therimuru.RestAuth.exception.jwt.access.BadAccessJWTException;
 import me.therimuru.RestAuth.exception.jwt.access.ExpiredAccessJWTException;
-import me.therimuru.RestAuth.object.JWTInformationWrapper;
+import me.therimuru.RestAuth.object.JwtInformationWrapper;
+import me.therimuru.RestAuth.object.TokenType;
 import me.therimuru.RestAuth.service.JwtService;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,15 +39,16 @@ public class JwtServiceTest {
     @DisplayName("JWT Service Testing: Generating and decoding JWT")
     @Order(1)
     public void jwtCycleTest() {
-        final JWTInformationWrapper startInformation = new JWTInformationWrapper(
+        final JwtInformationWrapper startInformation = new JwtInformationWrapper(
                 faker.number().randomNumber(),
-                faker.name().username().toLowerCase()
+                faker.name().username().toLowerCase(),
+                TokenType.ACCESS
         );
 
         final String token = jwtService.generateAccessToken(startInformation);
         assertNotNull(token, "JWT can't be null.");
 
-        final JWTInformationWrapper decodedJwtInformation = jwtService.decodeAccessToken(token);
+        final JwtInformationWrapper decodedJwtInformation = jwtService.decodeAccessToken(token);
         assertNotNull(decodedJwtInformation, "Decoded information from JWT can't be null.");
 
         assertEquals(startInformation, startInformation, "JWT's data must be equals before and after generating.");
@@ -56,9 +58,10 @@ public class JwtServiceTest {
     @DisplayName("JWT Service Testing: Decoding expired JWT")
     @Order(2)
     public void decodeJWT_expired() {
-        final JWTInformationWrapper jwtInformation = new JWTInformationWrapper(
+        final JwtInformationWrapper jwtInformation = new JwtInformationWrapper(
                 faker.number().randomNumber(),
                 faker.name().username().toLowerCase(),
+                TokenType.ACCESS,
                 Instant.now(),
                 Instant.now().minus(10, ChronoUnit.SECONDS)
         );
@@ -71,7 +74,7 @@ public class JwtServiceTest {
     @DisplayName("JWT Service Testing: Bad JWT algorithm")
     @Order(3)
     public void decodeJWT_badAlgorithm() throws NoSuchFieldException, IllegalAccessException {
-        final JWTInformationWrapper jwtInformation = new JWTInformationWrapper(faker.number().randomNumber(), faker.name().username());
+        final JwtInformationWrapper jwtInformation = new JwtInformationWrapper(faker.number().randomNumber(), faker.name().username(), TokenType.ACCESS);
         final String token = jwtService.generateAccessToken(jwtInformation);
 
         final Field jwtVerifier = jwtService.getClass().getDeclaredField("jwtVerifier");

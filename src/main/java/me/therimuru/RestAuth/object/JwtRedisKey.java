@@ -2,7 +2,7 @@ package me.therimuru.RestAuth.object;
 
 import jakarta.validation.constraints.NotNull;
 
-public record JWTRedisValue (
+public record JwtRedisKey(
         @NotNull Long userID,
         @NotNull String token
 ) {

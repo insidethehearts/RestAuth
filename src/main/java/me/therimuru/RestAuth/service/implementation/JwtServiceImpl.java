@@ -11,13 +11,13 @@ import lombok.RequiredArgsConstructor;
 import me.therimuru.RestAuth.exception.jwt.BadTokenTypeException;
 import me.therimuru.RestAuth.exception.jwt.access.BadAccessJWTException;
 import me.therimuru.RestAuth.exception.jwt.access.ExpiredAccessJWTException;
-import me.therimuru.RestAuth.object.JWTInformationWrapper;
+import me.therimuru.RestAuth.object.JwtInformationWrapper;
 import me.therimuru.RestAuth.object.TokenType;
 import me.therimuru.RestAuth.service.JwtService;
-import me.therimuru.RestAuth.service.RedisTokenService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
@@ -37,71 +37,67 @@ public class JwtServiceImpl implements JwtService {
     @Value("${app.jwt.refresh.durationUnit}")
     private ChronoUnit refreshTokenDurationUnit;
 
-    private final RedisTokenService redisTokenService;
-
     private Algorithm signAlgorithm;
-    private JWTVerifier jwtVerifier;
+    private JWTVerifier baseTokenVerifier;
 
     @PostConstruct
     private void init() {
         signAlgorithm = Algorithm.HMAC512(secret);
-        jwtVerifier = JWT
+        baseTokenVerifier = JWT
                 .require(signAlgorithm)
                 .withClaimPresence("id")
-                .withClaimPresence("login")
+                .withClaimPresence("username")
                 .withClaimPresence("iat")
                 .withClaimPresence("exp")
-                .withArrayClaim("token_type", new String[]{"ACCESS", "REFRESH"})
                 .build();
     }
 
-    public String generateAccessToken(JWTInformationWrapper jwtInformationWrapper) {
+    public String generateAccessToken(JwtInformationWrapper jwtInformationWrapper) {
         final Instant nowInstant = Instant.now();
         return JWT
                 .create()
                 .withClaim("id", jwtInformationWrapper.id())
-                .withClaim("login", jwtInformationWrapper.login())
+                .withClaim("username", jwtInformationWrapper.username())
+                .withClaim("token_type", "ACCESS")
                 .withIssuedAt(jwtInformationWrapper.issuedAt() != null ? jwtInformationWrapper.issuedAt() : nowInstant)
                 .withExpiresAt(jwtInformationWrapper.expiresAt() != null ? jwtInformationWrapper.expiresAt() : nowInstant.plus(accessTokenDuration, accessTokenDurationUnit))
                 .sign(signAlgorithm);
     }
 
-    public JWTInformationWrapper decodeAccessToken(String token) {
+    public JwtInformationWrapper decodeAccessToken(String token) {
         final DecodedJWT decodedJWT = decodeToken(token, TokenType.ACCESS);
-        return new JWTInformationWrapper(
+        return new JwtInformationWrapper(
                 decodedJWT.getClaim("id").asLong(),
-                decodedJWT.getClaim("login").asString(),
+                decodedJWT.getClaim("username").asString(),
+                TokenType.ACCESS,
                 decodedJWT.getIssuedAtAsInstant(),
                 decodedJWT.getExpiresAtAsInstant()
         );
     }
 
     @Override
-    public String generateRefreshToken(JWTInformationWrapper jwtInformationWrapper) {
+    public String generateRefreshToken(JwtInformationWrapper jwtInformationWrapper) {
         final Instant nowInstant = Instant.now();
         return JWT
                 .create()
                 .withClaim("id", jwtInformationWrapper.id())
-                .withClaim("login", jwtInformationWrapper.login())
+                .withClaim("username", jwtInformationWrapper.username())
+                .withClaim("token_type", "REFRESH")
                 .withIssuedAt(jwtInformationWrapper.issuedAt() != null ? jwtInformationWrapper.issuedAt() : nowInstant)
                 .withExpiresAt(jwtInformationWrapper.expiresAt() != null ? jwtInformationWrapper.expiresAt() : nowInstant.plus(refreshTokenDuration, refreshTokenDurationUnit))
                 .sign(signAlgorithm);
     }
 
     @Override
-    public JWTInformationWrapper decodeRefreshToken(String token) {
+    public JwtInformationWrapper decodeRefreshToken(String token) {
         final DecodedJWT decodedJWT = decodeToken(token, TokenType.REFRESH);
-        return new JWTInformationWrapper(
+        return new JwtInformationWrapper(
                 decodedJWT.getClaim("id").asLong(),
-                decodedJWT.getClaim("login").asString(),
+                decodedJWT.getClaim("username").asString(),
+                TokenType.REFRESH,
                 decodedJWT.getIssuedAtAsInstant(),
                 decodedJWT.getExpiresAtAsInstant()
         );
-    }
-
-    @Override
-    public void invalidateRefreshToken(Long userId) {
-        redisTokenService.invalidate(userId);
     }
 
     @Override
@@ -113,15 +109,20 @@ public class JwtServiceImpl implements JwtService {
     private DecodedJWT decodeToken(String token, TokenType tokenType) {
         DecodedJWT decodedJWT;
         try {
-            decodedJWT = jwtVerifier.verify(token);
+            decodedJWT = baseTokenVerifier.verify(token);
         } catch (TokenExpiredException exception) {
-            throw new ExpiredAccessJWTException();
+            throw new ExpiredAccessJWTException(); // todo flex
         }  catch (JWTVerificationException exception) {
-            throw new BadAccessJWTException();
+            throw new BadAccessJWTException(); // todo flex
         }
-        if (!tokenType.equals(TokenType.ANY) && decodedJWT.getClaim("token_type").asString().equals(tokenType.toString())) {
+        if (!tokenType.equals(TokenType.ANY) && !decodedJWT.getClaim("token_type").asString().equals(tokenType.toString())) {
             throw new BadTokenTypeException(tokenType);
         }
         return decodedJWT;
+    }
+
+    @Override
+    public Duration getRefreshTokenDuration() {
+        return Duration.of(refreshTokenDuration, refreshTokenDurationUnit);
     }
 }

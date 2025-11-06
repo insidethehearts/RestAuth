@@ -1,14 +1,16 @@
 package me.therimuru.RestAuth.service;
 
-import me.therimuru.RestAuth.object.JWTRedisValue;
+import me.therimuru.RestAuth.object.JwtRedisKey;
 
 import java.time.Instant;
 
 public interface RedisTokenService {
 
-    void saveRefreshToken(JWTRedisValue jwtRedisValue, Instant tokenExpirationInstant);
+    void saveRefreshToken(JwtRedisKey jwtRedisKey);
 
-    JWTRedisValue getRefreshToken(Long userId);
+    void saveRefreshToken(JwtRedisKey jwtRedisKey, Instant tokenExpirationInstant);
+
+    JwtRedisKey getRefreshToken(Long userId);
 
     void invalidate(Long userId);
 }

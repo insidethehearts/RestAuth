@@ -24,7 +24,10 @@ public class UserEntity {
     private String surname;
 
     @Column(nullable = false, length = 16, unique = true)
-    private String login;
+    private String username;
+
+    @Column(nullable = false)
+    private Integer age;
 
     @Column(nullable = false)
     @JsonIgnore

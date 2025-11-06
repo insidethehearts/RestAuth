@@ -1,20 +1,21 @@
 package me.therimuru.RestAuth.service;
 
-import me.therimuru.RestAuth.object.JWTInformationWrapper;
+import me.therimuru.RestAuth.object.JwtInformationWrapper;
 
+import java.time.Duration;
 import java.time.Instant;
 
 public interface JwtService {
 
-    String generateAccessToken(JWTInformationWrapper information);
+    String generateAccessToken(JwtInformationWrapper information);
 
-    JWTInformationWrapper decodeAccessToken(String token);
+    JwtInformationWrapper decodeAccessToken(String token);
 
-    String generateRefreshToken(JWTInformationWrapper information);
+    String generateRefreshToken(JwtInformationWrapper information);
 
-    JWTInformationWrapper decodeRefreshToken(String token);
-
-    void invalidateRefreshToken(Long userId);
+    JwtInformationWrapper decodeRefreshToken(String token);
 
     Instant getExpirationDate(String token);
+
+    Duration getRefreshTokenDuration();
 }
