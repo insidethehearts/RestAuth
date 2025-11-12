@@ -13,13 +13,22 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 @ControllerAdvice
 public class AdviceController {
 
-    @ExceptionHandler(exception = {UserNotFoundInDatabaseException.class, InvalidPasswordException.class, UserAlreadyRegisteredException.class, JwtException.class})
-    public ResponseEntity handleException(RuntimeException exception) {
+    @ExceptionHandler(exception = {UserNotFoundInDatabaseException.class, InvalidPasswordException.class, JwtException.class})
+    public ResponseEntity handle401Exception(RuntimeException exception) {
+        return errorResponse(exception, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(exception = UserAlreadyRegisteredException.class)
+    public ResponseEntity handle409Exception(RuntimeException exception) {
+        return errorResponse(exception, HttpStatus.CONFLICT);
+    }
+
+
+    private ResponseEntity errorResponse(RuntimeException exception, HttpStatus httpStatus) {
         return ApiResponse
-                .builder(HttpStatus.BAD_REQUEST)
-                .field("status", "Error")
+                .builder(httpStatus)
+                .field("status", "error")
                 .field("message", exception.getMessage())
                 .build();
     }
-
 }
