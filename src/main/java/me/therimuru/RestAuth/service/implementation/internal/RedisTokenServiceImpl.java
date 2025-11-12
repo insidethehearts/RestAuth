@@ -1,25 +1,30 @@
-package me.therimuru.RestAuth.service.implementation;
+package me.therimuru.RestAuth.service.implementation.internal;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import me.therimuru.RestAuth.object.JwtRedisKey;
-import me.therimuru.RestAuth.service.JwtService;
-import me.therimuru.RestAuth.service.RedisTokenService;
+import me.therimuru.RestAuth.service.contract.internal.RedisTokenService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class RedisTokenServiceImpl implements RedisTokenService {
 
-    private RedisTemplate<Long, Object> redisTemplate;
-    private JwtService jwtService;
+    private final RedisTemplate<Long, Object> redisTemplate;
+
+    @Value("${app.jwt.refresh.duration}")
+    private Integer refreshTokenDuration;
+    @Value("${app.jwt.refresh.durationUnit}")
+    private ChronoUnit refreshTokenDurationUnit;
 
     @Override
     public void saveRefreshToken(JwtRedisKey jwtRedisKey) {
-        saveRefreshToken(jwtRedisKey, Instant.now().plus(jwtService.getRefreshTokenDuration()));
+        saveRefreshToken(jwtRedisKey, Instant.now().plus(Duration.of(refreshTokenDuration, refreshTokenDurationUnit)));
     }
 
     @Override

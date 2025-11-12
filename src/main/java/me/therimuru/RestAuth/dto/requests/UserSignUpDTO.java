@@ -19,7 +19,7 @@ public class UserSignUpDTO {
     private String surname;
 
     @NotNull
-    @Pattern(regexp = "^[a-z0-9_]{2,16}$")
+    @Pattern(regexp = "^[a-z0-9_.]{2,16}$")
     private String username;
 
     @NotNull

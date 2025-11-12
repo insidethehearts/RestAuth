@@ -11,7 +11,7 @@ import lombok.Getter;
 public class UserSignInDTO {
 
     @NotNull
-    @Pattern(regexp = "^[a-z0-9_]{2,16}$")
+    @Pattern(regexp = "^[a-z0-9_.]{2,16}$")
     private String username;
 
     @NotNull

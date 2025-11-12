@@ -1,43 +1,38 @@
 package me.therimuru.RestAuth.controller;
 
 import jakarta.validation.Valid;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import me.therimuru.RestAuth.dto.requests.UserSignInDTO;
 import me.therimuru.RestAuth.dto.requests.UserSignUpDTO;
-import me.therimuru.RestAuth.entity.UserEntity;
-import me.therimuru.RestAuth.exception.database.UserAlreadyRegisteredException;
-import me.therimuru.RestAuth.exception.database.UserNotFoundInDatabaseException;
-import me.therimuru.RestAuth.exception.jwt.refresh.BadRefreshTokenException;
-import me.therimuru.RestAuth.mapper.UserMapper;
-import me.therimuru.RestAuth.object.JwtInformationWrapper;
-import me.therimuru.RestAuth.object.JwtRedisKey;
-import me.therimuru.RestAuth.object.TokenType;
-import me.therimuru.RestAuth.service.JwtService;
-import me.therimuru.RestAuth.service.RedisTokenService;
-import me.therimuru.RestAuth.service.UserService;
+import me.therimuru.RestAuth.service.contract.adapter.AuthService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.Instant;
-import java.util.HashMap;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.Map;
 
 import static org.springframework.http.HttpHeaders.SET_COOKIE;
 
 @RestController
-@AllArgsConstructor
+@RequiredArgsConstructor
 @RequestMapping(path = "/api/v1/auth", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 public class AuthController {
 
-    private UserService userService;
-    private JwtService jwtService;
+    private final AuthService authService;
+
+    @Value("${app.jwt.refresh.duration}")
+    private Integer refreshTokenDuration;
+    @Value("${app.jwt.refresh.durationUnit}")
+    private ChronoUnit refreshTokenDurationUnit;
 
     @ResponseBody
     @PostMapping(value = "/sign-up")
     public ResponseEntity<Map<String, Object>> signUp(@RequestBody @Valid UserSignUpDTO signUpDto) {
-        final String refreshToken = userService.register(signUpDto);
+        final String refreshToken = authService.signUp(signUpDto);
         return ResponseEntity
                 .ok()
                 .header(SET_COOKIE, generateRefreshTokenCookie(refreshToken))
@@ -47,7 +42,7 @@ public class AuthController {
     @ResponseBody
     @PostMapping(value = "/sign-in", consumes = MediaType.ALL_VALUE)
     public ResponseEntity<String> signIn(@RequestBody @Valid UserSignInDTO signInDTO) {
-        final String refreshToken = userService.regenerateRefreshToken(signInDTO);
+        final String refreshToken = authService.signIn(signInDTO);
         return ResponseEntity
                 .ok()
                 .header(SET_COOKIE, generateRefreshTokenCookie(refreshToken))
@@ -73,7 +68,7 @@ public class AuthController {
                 .secure(true)
                 .sameSite("Strict")
                 .path("/")
-                .maxAge(jwtService.getRefreshTokenDuration())
+                .maxAge(Duration.of(refreshTokenDuration, refreshTokenDurationUnit))
                 .build()
                 .toString();
     }

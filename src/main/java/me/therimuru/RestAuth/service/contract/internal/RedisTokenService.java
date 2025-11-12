@@ -1,4 +1,4 @@
-package me.therimuru.RestAuth.service;
+package me.therimuru.RestAuth.service.contract.internal;
 
 import me.therimuru.RestAuth.object.JwtRedisKey;
 
