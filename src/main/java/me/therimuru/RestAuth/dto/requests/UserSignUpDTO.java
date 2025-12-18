@@ -2,13 +2,14 @@ package me.therimuru.RestAuth.dto.requests;
 
 import jakarta.validation.constraints.*;
 import lombok.*;
+import me.therimuru.RestAuth.dto.DataTransferObject;
 
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
 @Builder
-public class UserSignUpDTO {
+public class UserSignUpDTO implements DataTransferObject {
 
     @NotNull
     @Pattern(regexp = "^[A-ZА-ЯЁ][a-zа-яё]{1,15}$")
@@ -30,4 +31,10 @@ public class UserSignUpDTO {
     @NotNull
     @Size(min = 6, max = 128)
     private String password;
+
+    @Override
+    public String debugString() {
+        return "%s:%s:%s:%d".formatted(name, surname, username, age);
+    }
+
 }

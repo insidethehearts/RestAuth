@@ -44,18 +44,8 @@ public class UserServiceImpl implements UserService {
         return findByUsernameAndPassword(signInDTO.getUsername(), signInDTO.getPassword());
     }
 
-    //    @Override
-//    public String regenerateRefreshToken(UserSignInDTO userSignInDTO) {
-//        final String username = userSignInDTO.getUsername();
-//        final String password = userSignInDTO.getPassword();
-//
-//        final UserEntity userEntity = findByUsernameAndPassword(username, password);
-//
-//        redisTokenService.invalidate(userEntity.getId());
-//        final String refreshToken = jwtService.generateRefreshToken(userMapper.userEntityToJwtInformationWrapper(userEntity));
-//        redisTokenService.saveRefreshToken(new JwtRedisKey(userEntity.getId(), refreshToken));
-//
-//        return refreshToken;
-
-//    }
+    @Override
+    public boolean existsById(Long id) {
+        return userRepository.existsById(id);
+    }
 }

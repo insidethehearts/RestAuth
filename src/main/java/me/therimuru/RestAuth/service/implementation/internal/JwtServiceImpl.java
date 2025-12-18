@@ -3,20 +3,17 @@ package me.therimuru.RestAuth.service.implementation.internal;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.exceptions.JWTVerificationException;
-import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import me.therimuru.RestAuth.exception.jwt.BadTokenTypeException;
-import me.therimuru.RestAuth.exception.jwt.access.BadAccessJWTException;
-import me.therimuru.RestAuth.exception.jwt.access.ExpiredAccessJWTException;
 import me.therimuru.RestAuth.object.JwtInformationWrapper;
 import me.therimuru.RestAuth.object.TokenType;
 import me.therimuru.RestAuth.service.contract.internal.JwtService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
@@ -58,18 +55,19 @@ public class JwtServiceImpl implements JwtService {
             throw new IllegalArgumentException("Expected tokenType to be ACCESS or REFRESH, but got: %s".formatted(tokenType));
 
         final Instant nowInstant = Instant.now();
+        final Duration tokenDuration = tokenType.equals(TokenType.REFRESH) ? Duration.of(refreshTokenDuration, refreshTokenDurationUnit) : Duration.of(accessTokenDuration, accessTokenDurationUnit);
         return JWT
                 .create()
                 .withClaim("id", jwtInfo.id())
                 .withClaim("username", jwtInfo.username())
                 .withClaim("token_type", tokenType.toString())
                 .withIssuedAt(jwtInfo.issuedAt() != null ? jwtInfo.issuedAt() : nowInstant)
-                .withExpiresAt(jwtInfo.expiresAt() != null ? jwtInfo.expiresAt() : nowInstant.plus(accessTokenDuration, accessTokenDurationUnit))
+                .withExpiresAt(jwtInfo.expiresAt() != null ? jwtInfo.expiresAt() : nowInstant.plus(tokenDuration))
                 .sign(signAlgorithm);
     }
 
     @Override
-    public JwtInformationWrapper decodeToken(String token, TokenType tokenType) { // todo flex
+    public JwtInformationWrapper decodeToken(String token, TokenType tokenType) {
         final DecodedJWT decodedJWT = decode(token, tokenType);
         return new JwtInformationWrapper(
                 decodedJWT.getClaim("id").asLong(),
@@ -86,16 +84,10 @@ public class JwtServiceImpl implements JwtService {
         return decodedJWT.getExpiresAtAsInstant();
     }
 
-    private DecodedJWT decode(String token, TokenType tokenType) { // todo flex
+    private DecodedJWT decode(String token, TokenType tokenType) {
         DecodedJWT decodedJWT;
-        try {
-            decodedJWT = baseTokenVerifier.verify(token);
-        } catch (TokenExpiredException exception) {
-            throw new ExpiredAccessJWTException(); // todo flex
-        }  catch (JWTVerificationException exception) {
-            throw new BadAccessJWTException(); // todo flex
-        }
-        if (!tokenType.equals(TokenType.ANY) && !decodedJWT.getClaim("token_type").asString().equals(tokenType.toString())) {
+        decodedJWT = baseTokenVerifier.verify(token);
+        if (!tokenType.equals(TokenType.ANY) && !decodedJWT.getClaim("token_type").asString().equalsIgnoreCase(tokenType.toString())) {
             throw new BadTokenTypeException(tokenType);
         }
         return decodedJWT;

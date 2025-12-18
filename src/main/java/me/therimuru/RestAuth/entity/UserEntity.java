@@ -32,4 +32,5 @@ public class UserEntity {
     @Column(nullable = false)
     @JsonIgnore
     private String password;
+
 }

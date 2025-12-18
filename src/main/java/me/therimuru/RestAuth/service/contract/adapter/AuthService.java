@@ -25,5 +25,10 @@ public interface AuthService {
      */
     String signIn(UserSignInDTO userSignInDTO);
 
+    /**
+     *
+     * @param refreshToken refresh token
+     * @return Generated access token as ${@link String}
+     */
     String getAccessToken(String refreshToken);
 }

@@ -15,4 +15,6 @@ public interface UserService {
 
     UserEntity findBySignInDTO(UserSignInDTO signInDTO) throws UserNotFoundInDatabaseException, InvalidPasswordException;
 
+    boolean existsById(Long id);
+
 }

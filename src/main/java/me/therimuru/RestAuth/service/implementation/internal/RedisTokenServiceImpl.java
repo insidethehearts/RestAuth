@@ -1,6 +1,7 @@
 package me.therimuru.RestAuth.service.implementation.internal;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import me.therimuru.RestAuth.object.JwtRedisKey;
 import me.therimuru.RestAuth.service.contract.internal.RedisTokenService;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,6 +12,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class RedisTokenServiceImpl implements RedisTokenService {
@@ -29,7 +31,9 @@ public class RedisTokenServiceImpl implements RedisTokenService {
 
     @Override
     public void saveRefreshToken(JwtRedisKey jwtRedisKey, Instant tokenExpirationInstant) {
+        log.info("[RedisTS] Saving token for user with {} id.", jwtRedisKey.userID());
         redisTemplate.opsForValue().set(jwtRedisKey.userID(), jwtRedisKey.token(), Duration.between(Instant.now(), tokenExpirationInstant));
+        log.info("[RedisTS] Token saved to redis successful.");
     }
 
     @Override
