@@ -2,7 +2,7 @@ package me.therimuru.RestAuth.controller;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import me.therimuru.RestAuth.dto.requests.SubscribeDTO;
+import me.therimuru.RestAuth.dto.requests.subscriptions.SubscribeDTO;
 import me.therimuru.RestAuth.security.UserIdAuthentication;
 import me.therimuru.RestAuth.service.contract.internal.SubscriptionService;
 import org.springframework.http.MediaType;

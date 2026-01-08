@@ -1,6 +1,6 @@
 package me.therimuru.RestAuth.mapper;
 
-import me.therimuru.RestAuth.dto.requests.UserSignUpDTO;
+import me.therimuru.RestAuth.dto.requests.auth.UserSignUpDTO;
 import me.therimuru.RestAuth.dto.responses.RegisteredUserDTO;
 import me.therimuru.RestAuth.entity.UserEntity;
 import me.therimuru.RestAuth.object.JwtInformationWrapper;

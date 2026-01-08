@@ -1,4 +1,4 @@
-package me.therimuru.RestAuth.dto.requests;
+package me.therimuru.RestAuth.dto.requests.auth;
 
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -20,7 +20,7 @@ public class UserSignUpDTO implements DataTransferObject {
     private String surname;
 
     @NotNull
-    @Pattern(regexp = "^[a-z0-9_.]{2,16}$")
+    @Pattern(regexp = "^[a-z0-9_.]{2,32}$")
     private String username;
 
     @NotNull
@@ -30,6 +30,7 @@ public class UserSignUpDTO implements DataTransferObject {
 
     @NotNull
     @Size(min = 6, max = 128)
+    @ToString.Exclude
     private String password;
 
     @Override

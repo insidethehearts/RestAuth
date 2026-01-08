@@ -1,20 +1,22 @@
 package me.therimuru.RestAuth.service.contract.adapter;
 
-import me.therimuru.RestAuth.dto.requests.UserSignInDTO;
-import me.therimuru.RestAuth.dto.requests.UserSignUpDTO;
+import me.therimuru.RestAuth.dto.requests.auth.UserSignInDTO;
+import me.therimuru.RestAuth.dto.requests.auth.UserSignUpDTO;
+import me.therimuru.RestAuth.dto.responses.SignUpResult;
 import me.therimuru.RestAuth.exception.database.InvalidPasswordException;
 import me.therimuru.RestAuth.exception.database.UserAlreadyRegisteredException;
 import me.therimuru.RestAuth.exception.database.UserNotFoundInDatabaseException;
+import org.springframework.http.ResponseEntity;
 
 public interface AuthService {
 
     /**
      *
      * @param userSignUpDTO validated DTO from controller
-     * @return Refresh Token as {@link String}
+     * @return {@link ResponseEntity}
      * @throws UserAlreadyRegisteredException when user with provided username already registered
      */
-    String signUp(UserSignUpDTO userSignUpDTO);
+    SignUpResult signUp(UserSignUpDTO userSignUpDTO);
 
     /**
      *

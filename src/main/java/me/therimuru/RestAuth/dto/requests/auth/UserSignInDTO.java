@@ -1,4 +1,4 @@
-package me.therimuru.RestAuth.dto.requests;
+package me.therimuru.RestAuth.dto.requests.auth;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;

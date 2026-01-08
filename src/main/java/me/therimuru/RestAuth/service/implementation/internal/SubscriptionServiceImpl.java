@@ -10,6 +10,7 @@ import me.therimuru.RestAuth.service.contract.internal.UserService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -37,6 +38,12 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     @Override
     public List<SubscriptionEntity> getSubscriptions(Long subscriberId) {
         return repository.findBySubscriberId(subscriberId);
+    }
+
+    @Override
+    public boolean isSubscribed(Long subscriberId, Long profileId) {
+        final Optional<SubscriptionEntity> subscription = repository.findBySubscriberIdAndTargetId(subscriberId, profileId);
+        return subscription.isPresent();
     }
 
     @Override

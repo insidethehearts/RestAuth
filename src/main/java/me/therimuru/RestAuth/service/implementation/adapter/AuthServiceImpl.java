@@ -2,8 +2,9 @@ package me.therimuru.RestAuth.service.implementation.adapter;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.therimuru.RestAuth.dto.requests.UserSignInDTO;
-import me.therimuru.RestAuth.dto.requests.UserSignUpDTO;
+import me.therimuru.RestAuth.dto.requests.auth.UserSignInDTO;
+import me.therimuru.RestAuth.dto.requests.auth.UserSignUpDTO;
+import me.therimuru.RestAuth.dto.responses.SignUpResult;
 import me.therimuru.RestAuth.entity.UserEntity;
 import me.therimuru.RestAuth.exception.database.InvalidPasswordException;
 import me.therimuru.RestAuth.exception.database.UserAlreadyRegisteredException;
@@ -18,7 +19,6 @@ import me.therimuru.RestAuth.service.contract.internal.RedisTokenService;
 import me.therimuru.RestAuth.service.contract.internal.UserService;
 import org.springframework.stereotype.Service;
 
-@Slf4j
 @AllArgsConstructor
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -28,18 +28,15 @@ public class AuthServiceImpl implements AuthService {
     private RedisTokenService redisTokenService;
 
     @Override
-    public String signUp(UserSignUpDTO userSignUpDTO) throws UserAlreadyRegisteredException {
+    public SignUpResult signUp(UserSignUpDTO userSignUpDTO) throws UserAlreadyRegisteredException {
         final UserEntity user = userService.register(userSignUpDTO);
-        log.info("[AuthS/SignUp] User with username {} registered successfull.", user.getUsername());
-        log.info("[AuthS/SignUp] Generating refresh token...");
         final String token = generateAndPrepareTokenForUser(user);
-        return token;
+        return new SignUpResult(user, token);
     }
 
     @Override
     public String signIn(UserSignInDTO userSignInDTO) throws UserNotFoundInDatabaseException, InvalidPasswordException {
         final UserEntity user = userService.findBySignInDTO(userSignInDTO);
-        log.info("[AuthS/SignIn] User with username {} and specified password was found. Generating token...", userSignInDTO.getUsername());
         final String token = generateAndPrepareTokenForUser(user);
         return token;
     }
@@ -58,9 +55,7 @@ public class AuthServiceImpl implements AuthService {
         final Long userId = user.getId();
         final String username = user.getUsername();
 
-        log.info("[AuthS] Generating token for user with {} id...", userId);
         final String refreshToken = jwtService.generateToken(new JwtInformationWrapper(userId, username, TokenType.REFRESH));
-        log.info("[AuthS] Token generated. Saving to Redis... [{}]", refreshToken);
         redisTokenService.invalidate(user.getId());
         redisTokenService.saveRefreshToken(new JwtRedisKey(userId, refreshToken));
 

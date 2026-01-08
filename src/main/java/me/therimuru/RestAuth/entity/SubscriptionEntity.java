@@ -1,16 +1,19 @@
 package me.therimuru.RestAuth.entity;
 
 import jakarta.persistence.*;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 
 import java.util.UUID;
 
 @Entity
 @Table(name = "subscriptions",
         uniqueConstraints = @UniqueConstraint(
-                columnNames = {"subscriberId", "targetId"}
+                columnNames = {"subscriber_id", "target_id"}
         )
 )
+@Setter
+@Getter
+@NoArgsConstructor
 @RequiredArgsConstructor
 public class SubscriptionEntity {
 
@@ -19,9 +22,11 @@ public class SubscriptionEntity {
     @Column(name = "uuid", updatable = false, nullable = false)
     private UUID uuid;
 
+    @NonNull
     @Column(name = "subscriber_id", updatable = false, nullable = false)
-    private final Long subscriberId;
+    private Long subscriberId;
 
+    @NonNull
     @Column(name = "target_id", updatable = false, nullable = false)
-    private final Long targetId;
+    private Long targetId;
 }

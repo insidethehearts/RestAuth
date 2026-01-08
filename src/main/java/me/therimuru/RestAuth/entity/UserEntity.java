@@ -9,7 +9,6 @@ import lombok.*;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
 @Data
 public class UserEntity {
 
@@ -23,7 +22,7 @@ public class UserEntity {
     @Column(nullable = false, length = 32)
     private String surname;
 
-    @Column(nullable = false, length = 16, unique = true)
+    @Column(nullable = false, length = 32, unique = true)
     private String username;
 
     @Column(nullable = false)
@@ -32,5 +31,11 @@ public class UserEntity {
     @Column(nullable = false)
     @JsonIgnore
     private String password;
+
+    @Column(length = 128)
+    private String bio;
+
+    @Column(nullable = false, columnDefinition = "boolean default false")
+    private Boolean bioPublic = false;
 
 }

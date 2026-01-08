@@ -1,8 +1,9 @@
 package me.therimuru.RestAuth.service.implementation.internal;
 
 import lombok.AllArgsConstructor;
-import me.therimuru.RestAuth.dto.requests.UserSignInDTO;
-import me.therimuru.RestAuth.dto.requests.UserSignUpDTO;
+import me.therimuru.RestAuth.dto.requests.auth.UserSignInDTO;
+import me.therimuru.RestAuth.dto.requests.auth.UserSignUpDTO;
+import me.therimuru.RestAuth.dto.requests.profile.UpdateProfileDTO;
 import me.therimuru.RestAuth.entity.UserEntity;
 import me.therimuru.RestAuth.exception.database.InvalidPasswordException;
 import me.therimuru.RestAuth.exception.database.UserAlreadyRegisteredException;
@@ -12,6 +13,8 @@ import me.therimuru.RestAuth.repository.UserRepository;
 import me.therimuru.RestAuth.service.contract.internal.UserService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -42,6 +45,24 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserEntity findBySignInDTO(UserSignInDTO signInDTO) throws UserNotFoundInDatabaseException, InvalidPasswordException {
         return findByUsernameAndPassword(signInDTO.getUsername(), signInDTO.getPassword());
+    }
+
+    @Override
+    public Optional<UserEntity> findByIdSafe(Long id) throws UserNotFoundInDatabaseException {
+        return userRepository.findById(id);
+    }
+
+    @Override
+    public void edit(Long id, UpdateProfileDTO dto) {
+        final UserEntity user = userRepository.findById(id).orElseThrow(() -> new UserNotFoundInDatabaseException(id));
+
+        if (dto.getNullableName().isPresent()) user.setName(dto.getName());
+        if (dto.getNullableSurname().isPresent()) user.setSurname(dto.getSurname());
+        if (dto.getNullableAge().isPresent()) user.setAge(dto.getAge());
+        if (dto.getNullableBio().isPresent()) user.setBio(dto.getBio());
+        if (dto.getNullableBioPublic().isPresent()) user.setBioPublic(dto.isBioPublic());
+
+        userRepository.save(user);
     }
 
     @Override

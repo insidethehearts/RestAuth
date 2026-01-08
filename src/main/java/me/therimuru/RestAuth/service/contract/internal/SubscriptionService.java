@@ -16,4 +16,5 @@ public interface SubscriptionService {
 
     void unsubscribe(Long subscriberId, Long targetId);
 
+    boolean isSubscribed(Long targetId, Long id);
 }

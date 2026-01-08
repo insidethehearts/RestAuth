@@ -31,9 +31,7 @@ public class RedisTokenServiceImpl implements RedisTokenService {
 
     @Override
     public void saveRefreshToken(JwtRedisKey jwtRedisKey, Instant tokenExpirationInstant) {
-        log.info("[RedisTS] Saving token for user with {} id.", jwtRedisKey.userID());
         redisTemplate.opsForValue().set(jwtRedisKey.userID(), jwtRedisKey.token(), Duration.between(Instant.now(), tokenExpirationInstant));
-        log.info("[RedisTS] Token saved to redis successful.");
     }
 
     @Override
