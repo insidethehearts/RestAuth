@@ -1,6 +1,7 @@
 package me.therimuru.RestAuth.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -36,6 +37,7 @@ public class UserEntity {
     private String bio;
 
     @Column(nullable = false, columnDefinition = "boolean default false")
+    @JsonProperty("bio_public")
     private Boolean bioPublic = false;
 
 }

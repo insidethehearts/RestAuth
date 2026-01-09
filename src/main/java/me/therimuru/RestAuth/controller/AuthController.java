@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import me.therimuru.RestAuth.dto.requests.auth.UserSignInDTO;
 import me.therimuru.RestAuth.dto.requests.auth.UserSignUpDTO;
-import me.therimuru.RestAuth.dto.responses.SignUpResult;
+import me.therimuru.RestAuth.dto.responses.UserTokenServiceResult;
 import me.therimuru.RestAuth.service.contract.adapter.AuthService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -35,21 +35,21 @@ public class AuthController {
     @ResponseBody
     @PostMapping(value = "/sign-up")
     public ResponseEntity<Object> signUp(@RequestBody @Valid UserSignUpDTO signUpDto) {
-        final SignUpResult data = authService.signUp(signUpDto);
+        final UserTokenServiceResult result = authService.signUp(signUpDto);
         return ResponseEntity
                 .ok()
-                .header(SET_COOKIE, refreshTokenCookie(data.getRefreshToken()))
-                .body(data.getUser());
+                .header(SET_COOKIE, refreshTokenCookie(result.getRefreshToken()))
+                .body(result.getUser());
     }
 
     @ResponseBody
     @PostMapping(value = "/sign-in", consumes = MediaType.ALL_VALUE)
     public ResponseEntity<Object> signIn(@RequestBody @Valid UserSignInDTO signInDTO) {
-        final String refreshToken = authService.signIn(signInDTO);
+        final UserTokenServiceResult result = authService.signIn(signInDTO);
         return ResponseEntity
                 .ok()
-                .header(SET_COOKIE, refreshTokenCookie(refreshToken))
-                .build();
+                .header(SET_COOKIE, refreshTokenCookie(result.getRefreshToken()))
+                .body(result.getUser());
     }
 
     @ResponseBody

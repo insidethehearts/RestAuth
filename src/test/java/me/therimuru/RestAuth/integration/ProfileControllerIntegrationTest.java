@@ -2,7 +2,6 @@ package me.therimuru.RestAuth.integration;
 
 import com.github.javafaker.Faker;
 import com.github.javafaker.Name;
-import jakarta.servlet.http.Cookie;
 import me.therimuru.RestAuth.dto.requests.auth.UserSignUpDTO;
 import me.therimuru.RestAuth.dto.response.AccessTokenResponseDTO;
 import org.junit.jupiter.api.BeforeAll;

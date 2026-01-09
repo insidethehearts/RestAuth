@@ -6,7 +6,7 @@ import me.therimuru.RestAuth.entity.UserEntity;
 
 @AllArgsConstructor
 @Getter
-public class SignUpResult {
+public class UserTokenServiceResult {
 
     private UserEntity user;
 

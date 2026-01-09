@@ -2,30 +2,25 @@ package me.therimuru.RestAuth.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javafaker.Faker;
-import com.github.javafaker.Name;
 import lombok.extern.slf4j.Slf4j;
 import me.therimuru.RestAuth.dto.requests.auth.UserSignUpDTO;
+import me.therimuru.RestAuth.utils.RequestSamples;
+import me.therimuru.RestAuth.utils.UserUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.test.web.servlet.*;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import static net.bytebuddy.matcher.ElementMatchers.is;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @Slf4j
 @Testcontainers
@@ -48,8 +43,8 @@ public class AuthControllerIntegrationTest {
     static void setUp() {
         faker = new Faker();
 
-        user1 = newRandomUser();
-        user2 = newRandomUser();
+        user1 = UserUtils.newRandomUser();
+        user2 = UserUtils.newRandomUser();
     }
 
     @Container
@@ -60,33 +55,14 @@ public class AuthControllerIntegrationTest {
         registry.add("REDIS_PORT", () -> redis.getMappedPort(6379));
     }
 
-    static UserSignUpDTO newRandomUser() {
-        final Name fakerName = faker.name();
-
-        final String name = fakerName.firstName();
-        final String surname = fakerName.lastName();
-        final int age = faker.number().numberBetween(18, 99);
-        final String username = fakerName.username();
-        final String password = faker.internet().password(12, 32, true, true, true);
-
-        return new UserSignUpDTO(name, surname, username, age, password);
-    }
 
     @Order(1)
     @Test
     void expectSuccess_signUpTest() throws Exception {
-        MvcResult signUpResult = signUp(
-                user1,
-                status().isOk(),
-                jsonPath("$.id").isNumber(),
-                jsonPath("$.name").isString(),
-                
-        );
-        System.out.println(signUpResult.getResponse().getContentAsString());
-        final String user1RefreshToken = signUpResult
+        final String user1RefreshToken = RequestSamples.signUpResult(mockMvc, objectMapper, user1)
                 .getResponse()
                 .getCookie("R-TOKEN").getValue();
-        final String user2RefreshToken = signUp(user2, result -> status().isOk())
+        final String user2RefreshToken = RequestSamples.signUpResult(mockMvc, objectMapper, user2)
                 .getResponse()
                 .getCookie("R-TOKEN").getValue();
     }
@@ -94,18 +70,6 @@ public class AuthControllerIntegrationTest {
     @Order(2)
     @Test
     void expect409() throws Exception {
-        signUp(user1, result -> status().isConflict());
+        RequestSamples.signUpResult(mockMvc, objectMapper, user1, status().isConflict());
     }
-
-    MvcResult signUp(UserSignUpDTO userSignUpDTO, ResultMatcher... resultMatchers) throws Exception {
-        return mockMvc
-                .perform(
-                        MockMvcRequestBuilders.post("/api/v1/auth/sign-up")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(userSignUpDTO))
-                )
-                .andExpectAll(resultMatchers)
-                .andReturn();
-    }
-
 }

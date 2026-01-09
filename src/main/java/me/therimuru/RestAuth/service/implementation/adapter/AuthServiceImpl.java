@@ -1,10 +1,9 @@
 package me.therimuru.RestAuth.service.implementation.adapter;
 
 import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import me.therimuru.RestAuth.dto.requests.auth.UserSignInDTO;
 import me.therimuru.RestAuth.dto.requests.auth.UserSignUpDTO;
-import me.therimuru.RestAuth.dto.responses.SignUpResult;
+import me.therimuru.RestAuth.dto.responses.UserTokenServiceResult;
 import me.therimuru.RestAuth.entity.UserEntity;
 import me.therimuru.RestAuth.exception.database.InvalidPasswordException;
 import me.therimuru.RestAuth.exception.database.UserAlreadyRegisteredException;
@@ -28,17 +27,17 @@ public class AuthServiceImpl implements AuthService {
     private RedisTokenService redisTokenService;
 
     @Override
-    public SignUpResult signUp(UserSignUpDTO userSignUpDTO) throws UserAlreadyRegisteredException {
+    public UserTokenServiceResult signUp(UserSignUpDTO userSignUpDTO) throws UserAlreadyRegisteredException {
         final UserEntity user = userService.register(userSignUpDTO);
         final String token = generateAndPrepareTokenForUser(user);
-        return new SignUpResult(user, token);
+        return new UserTokenServiceResult(user, token);
     }
 
     @Override
-    public String signIn(UserSignInDTO userSignInDTO) throws UserNotFoundInDatabaseException, InvalidPasswordException {
+    public UserTokenServiceResult signIn(UserSignInDTO userSignInDTO) throws UserNotFoundInDatabaseException, InvalidPasswordException {
         final UserEntity user = userService.findBySignInDTO(userSignInDTO);
         final String token = generateAndPrepareTokenForUser(user);
-        return token;
+        return new UserTokenServiceResult(user, token);
     }
 
     @Override
